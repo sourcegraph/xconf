@@ -23,7 +23,9 @@ body {
     font-size: 3.5em;
     font-weight: bold;
     color: {{$blue}};
-    _font-variant: small-caps;
+}
+.jumbotron h1 a {
+    color: {{$blue}};
 }
 .jumbotron .lead, .jumbotron .powered-by {
     padding-bottom: 0;
@@ -76,7 +78,11 @@ button .glyphicon {
 }
 
 #fake-results-container {
-    display: none;
+    opacity: 0;
+}
+#fake-results-container.show {
+    opacity: 1;
+    transition: opacity 0.1s ease-in-out;
 }
 #fake-results-container .fake-result:nth-child(1) pre.sourcegraph-code {
     height: 205px;

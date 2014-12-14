@@ -12,7 +12,7 @@
   <body>
     <div class="container">
       <div class="jumbotron">
-        <h1 class="brand">xconf.io</h1>
+        <h1 class="brand"><a href="/">xconf.io</a></h1>
         <p class="powered-by">Powered by <a href="https://sourcegraph.com" target="_blank">✱ Sourcegraph</a></p>
       </div>
 
@@ -51,7 +51,7 @@
       <div class="row" id="results-container" data-pjax-container>
         {{template "Results" $}}
       </div>
-      <div class="row" id="fake-results-container">
+      <div class="row" id="fake-results-container" style="display:none">
         <ul class="list-unstyled">
           {{template "FakeResult"}}
           {{template "FakeResult"}}
