@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap 101 Template</title>
+
+    {{template "HeadIncludes"}}
+    <style>{{template "HeadStyles"}}</style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="jumbotron">
+        <h1 class="brand">xconf.io</h1>
+        <!-- <p class="lead">Dockerfile search engine</p> -->
+        <p class="powered-by">Powered by <a href="https://sourcegraph.com" target="_blank">✱ Sourcegraph</a></p>
+        <!-- <p><a class="btn btn-lg btn-success" href="#" role="button">Get started today</a></p> -->
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <form role="form" class="search">
+            <div class="form-group">
+              <label for="q">Find Dockerfiles containing:</label>
+              <input type="search" class="form-control input-lg" name="q" id="q" placeholder="Dockerfile search" autofocus>
+            </div>
+            <button type="submit" class="btn btn-default btn-lg"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search Dockerfiles</button>
+          </form> 
+        </div>
+      </div>
+
+      {{if .Query}}
+      <div class="row results">
+        <div class="col-md-12">
+          <ul class="list-unstyled">
+            {{range .Results}}
+            <li>
+              <script type="text/javascript" src="{{.}}"></script>
+            </li>
+            {{end}}
+          </ul>
+        </div>
+      </div>
+      {{end}}
+
+    </div>
+
+    {{template "BodyIncludes"}}
+  </body>
+</html>

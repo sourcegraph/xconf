@@ -1,0 +1,54 @@
+{{define "HeadStyles"}}
+
+body {
+    font-family: "Open Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+}
+
+@media(min-width: 1200px) {
+    .container {
+        width: 970px;
+    }
+}
+
+{{$blue := "#4E9BD4"}}
+.jumbotron {
+    background-color: transparent;
+    text-align: center;
+    padding: 5px;
+}
+.jumbotron .brand {
+    margin: 10px 0 0 0;
+    font-size: 3.5em;
+    font-weight: bold;
+    color: {{$blue}};
+}
+.jumbotron .lead, .jumbotron .powered-by {
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+.jumbotron .lead {
+    font-size: 2.1em;
+}
+.jumbotron .powered-by, .jumbotron .powered-by a {
+    color: #999;
+}
+.jumbotron .powered-by {
+    font-size: 1.3em;
+}
+
+form.search {
+    text-align: center;
+}
+button .glyphicon {
+    vertical-align: -2px;
+    padding-right: 4px;
+}
+
+.results {
+    margin-top: 20px;
+}
+.results li {
+    margin-bottom: 20px;
+}
+
+{{end}}
