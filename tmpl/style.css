@@ -59,20 +59,40 @@ button .glyphicon {
     padding-right: 4px;
 }
 
-.results {
+#results-container, #fake-results-container {
     margin-top: 20px;
 }
-.results li {
+#results-container li {
     margin-bottom: 20px;
 }
-.results .no-results {
+#results-container .no-results {
     margin-top: 50px;
     text-align: center;
     font-size: 1.3em;
 }
-.results .no-results em {
+#results-container .no-results em {
     font-weight: bold;
     font-style: normal;
 }
+
+#fake-results-container {
+    display: none;
+}
+#fake-results-container .fake-result:nth-child(1) pre.sourcegraph-code {
+    height: 205px;
+}
+#fake-results-container .fake-result:nth-child(2) pre.sourcegraph-code {
+    height: 130px;
+}
+#fake-results-container .fake-result:nth-child(3) pre.sourcegraph-code {
+    height: 180px;
+}
+#fake-results-container .fake-result:nth-child(4) pre.sourcegraph-code {
+    height: 250px;
+}
+#fake-results-container .sourcegraph-footer {
+    height: 33px;
+}
+
 
 {{end}}

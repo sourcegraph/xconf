@@ -2,8 +2,8 @@
 {{if .Query}}
 <div class="col-md-12">
   {{range .Results}}
-  <ul class="list-unstyled">
-    <li>
+  <ul class="list-unstyled" id="results">
+    <li class="result">
       {{.HTML}}
     </li>
   </ul>
@@ -17,3 +17,13 @@
 {{end}}
 
 {{template "Results" $}}
+
+{{/* FakeResult is displayed while results are loading. */}}
+{{define "FakeResult"}}
+<li class="fake-result">
+  <div class="sourcegraph-sourcebox">
+    <pre class="sourcegraph-code theme-default"></pre>
+    <div class="sourcegraph-footer"></div>
+  </div>
+</li>
+{{end}}

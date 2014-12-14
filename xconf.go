@@ -66,6 +66,12 @@ var (
 		"sgAssetURL": func(path string) string {
 			return sgAssetURL.ResolveReference(&url.URL{Path: path}).String()
 		},
+		"assetInfix": func() string {
+			if *dev {
+				return "."
+			}
+			return ".min."
+		},
 	}
 )
 

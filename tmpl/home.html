@@ -30,10 +30,10 @@
             <!-- <button type="submit" class="btn btn-default btn-lg"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> Example queries</button> -->
             <div class="btn-group">
               <a data-toggle="dropdown" aria-expanded="false">Example queries <span class="caret"></span></a>
-              <ul class="dropdown-menu" role="menu">
+              <ul class="dropdown-menu" role="menu" id="example-queries">
                 {{range exampleQueries}}
                 {{if .}}
-                <li><a href="{{queryURL .}}">{{.}}</a></li>
+                <li><a data-query="{{.}}" href="{{queryURL .}}">{{.}}</a></li>
                 {{else}}
                 <li class="divider"></li>
                 {{end}}
@@ -48,39 +48,19 @@
         </div>
       </div>
 
-      <div class="row results" id="results" data-pjax-container>
+      <div class="row" id="results-container" data-pjax-container>
         {{template "Results" $}}
+      </div>
+      <div class="row" id="fake-results-container">
+        <ul class="list-unstyled">
+          {{template "FakeResult"}}
+          {{template "FakeResult"}}
+          {{template "FakeResult"}}
+          {{template "FakeResult"}}
+        </ul>
       </div>
 
     </div>
-
-    <script>
-     // Query highlighting
-     function highlightQuery() {
-       var q = document.getElementById("q").value;
-       if (q) {
-         q.split(/[^\w]/).forEach(function(p) {
-           $("pre.sourcegraph-code span:contains('" + p.replace(/[^\w.-]/g, "") + "')").css("background-color", "yellow");
-         });
-       }
-     }
-     document.addEventListener("DOMContentLoaded", highlightQuery);
-
-     // PJAX
-     document.addEventListener("DOMContentLoaded", function() {
-       /*$(document).on("submit", "form[data-pjax]", function(event) {
-             var $e = $(this);
-             var $container = $($e.attr("data-pjax"));
-             $.pjax.submit(event, {container: $container});
-             }); */
-
-       $(document).on("submit", "form[data-pjax]", function(event) {
-         console.log("PJAX submit");
-         $.pjax.submit(event, {container: $("[data-pjax-container]")});
-         event.preventDefault();
-       });
-     });
-    </script>
 
     {{template "AboutModal"}}
 
