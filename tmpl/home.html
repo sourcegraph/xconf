@@ -69,15 +69,6 @@
     </div>
 
     <script>
-     {{if .Query}}
-     /* // Autofocus at end of input.
-        function moveCursorToEndOfInput(ev) {
-        console.log('x');
-        ev.target.value = ev.target.value;
-        ev.target.removeEventListener("focus", moveCursorToEndOfInput);
-        }
-        document.getElementById("q").addEventListener("focus", moveCursorToEndOfInput); */
-     {{end}}
      {{if .Results}}
      document.addEventListener("DOMContentLoaded", function() {
        var q = {{.Query}};
