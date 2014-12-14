@@ -42,8 +42,13 @@ func main() {
 
 var (
 	tmpl      *template.Template
-	tmplFuncs = template.FuncMap{}
 	tmplMu    sync.Mutex
+	tmplFuncs = template.FuncMap{
+		"exampleQueries": func() []string { return exampleQueries },
+		"queryURL": func(q string) string {
+			return "/?" + url.Values{"q": []string{q}}.Encode()
+		},
+	}
 )
 
 func parseTemplates() error {
@@ -56,6 +61,20 @@ func parseTemplates() error {
 
 var (
 	sgc = sourcegraph.NewClient(nil)
+)
+
+var (
+	exampleQueries = []string{
+		"nodejs",
+		"docpad",
+		"mysql",
+		"postgres",
+		"wordpress",
+		"ubuntu",
+		"apt-get install",
+		"add-apt-repository",
+		"golang",
+	}
 )
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
@@ -80,7 +99,8 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	data.Query = strings.TrimSpace(r.FormValue("q"))
 
 	if data.Query != "" {
-		units, _, err := sgc.Units.List(nil)
+		opt := &sourcegraph.UnitListOptions{Query: data.Query}
+		units, _, err := sgc.Units.List(opt)
 		if err != nil {
 			log.Println("Units.List:", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)

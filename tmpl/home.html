@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bootstrap 101 Template</title>
+    <title>xconf.io - Dockerfile search</title>
 
     {{template "HeadIncludes"}}
     <style>{{template "HeadStyles"}}</style>
@@ -23,9 +23,21 @@
           <form role="form" class="search">
             <div class="form-group">
               <label for="q">Find Dockerfiles containing:</label>
-              <input type="search" class="form-control input-lg" name="q" id="q" placeholder="Dockerfile search" autofocus>
+              <input type="search" class="form-control input-lg" name="q" id="q"
+                     placeholder="Dockerfile search" value="{{.Query}}" autofocus
+                     onfocus="this.value=this.value"
+                     >
             </div>
-            <button type="submit" class="btn btn-default btn-lg"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search Dockerfiles</button>
+            <button type="submit" class="btn btn-primary btn-lg"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search Dockerfiles</button>
+            <!-- <button type="submit" class="btn btn-default btn-lg"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> Example queries</button> -->
+            <div class="btn-group">
+              <a data-toggle="dropdown" aria-expanded="false">Example queries <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                {{range exampleQueries}}
+                <li><a href="{{queryURL .}}">{{.}}</a></li>
+                {{end}}
+              </ul>
+            </div>
           </form> 
         </div>
       </div>
@@ -33,18 +45,42 @@
       {{if .Query}}
       <div class="row results">
         <div class="col-md-12">
+          {{range .Results}}
           <ul class="list-unstyled">
-            {{range .Results}}
             <li>
               <script type="text/javascript" src="{{.}}"></script>
             </li>
-            {{end}}
           </ul>
+          {{else}}
+          <div class="no-results alert alert-warning">
+            Your search - <em>{{.Query}}</em> - did not match any Dockerfiles.
+          </div>
+          {{end}}
         </div>
       </div>
       {{end}}
 
     </div>
+
+    <script>
+     {{if .Query}}
+     /* // Autofocus at end of input.
+        function moveCursorToEndOfInput(ev) {
+        console.log('x');
+        ev.target.value = ev.target.value;
+        ev.target.removeEventListener("focus", moveCursorToEndOfInput);
+        }
+        document.getElementById("q").addEventListener("focus", moveCursorToEndOfInput); */
+     {{end}}
+     {{if .Results}}
+     document.addEventListener("DOMContentLoaded", function() {
+       var q = {{.Query}};
+       q.split(/[^\w]/).forEach(function(p) {
+         $("pre.sourcegraph-code span:contains('" + p.replace(/[^\w.-]/g, "") + "')").css("background-color", "yellow");
+       });
+     });
+     {{end}}
+    </script>
 
     {{template "BodyIncludes"}}
   </body>

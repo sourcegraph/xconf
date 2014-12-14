@@ -21,6 +21,7 @@ body {
     font-size: 3.5em;
     font-weight: bold;
     color: {{$blue}};
+    _font-variant: small-caps;
 }
 .jumbotron .lead, .jumbotron .powered-by {
     padding-bottom: 0;
@@ -37,7 +38,12 @@ body {
 }
 
 form.search {
-    text-align: center;
+    _text-align: center;
+}
+form.search .btn-group {
+    font-size: 1.3em;
+    margin-left: 10px;
+    cursor: pointer;
 }
 button .glyphicon {
     vertical-align: -2px;
@@ -49,6 +55,15 @@ button .glyphicon {
 }
 .results li {
     margin-bottom: 20px;
+}
+.results .no-results {
+    margin-top: 50px;
+    text-align: center;
+    font-size: 1.3em;
+}
+.results .no-results em {
+    font-weight: bold;
+    font-style: normal;
 }
 
 {{end}}
