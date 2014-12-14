@@ -2,14 +2,17 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"html/template"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
 	"sync"
+	"time"
 
 	"sourcegraph.com/sourcegraph/go-sourcegraph/sourcegraph"
 )
@@ -19,6 +22,9 @@ var (
 	dev           = flag.Bool("dev", false, "development mode")
 	sgURLStr      = flag.String("sg", "https://sourcegraph.com", "base Sourcegraph URL")
 	sgAssetURLStr = flag.String("sg-asset", "https://sourcegraph.com/static/", "base Sourcegraph asset URL")
+
+	clientTimeout = flag.Duration("client-timeout", time.Second*5, "timeout for HTTP requests")
+	queryTimeout  = flag.Duration("query-timeout", time.Second*7, "timeout for query API call")
 )
 
 var (
@@ -26,9 +32,16 @@ var (
 	sgAssetURL *url.URL
 )
 
+var (
+	httpClient = &http.Client{}
+	sgc        = sourcegraph.NewClient(httpClient)
+)
+
 func main() {
 	log.SetFlags(0)
 	flag.Parse()
+
+	httpClient.Timeout = *clientTimeout
 
 	var err error
 	sgURL, err = url.Parse(*sgURLStr)
@@ -84,11 +97,6 @@ func parseTemplates() error {
 }
 
 var (
-	httpClient = &http.Client{}
-	sgc        = sourcegraph.NewClient(httpClient)
-)
-
-var (
 	exampleQueries = []string{
 		"nodejs",
 		"docpad",
@@ -124,47 +132,27 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	var data struct {
 		Query   string
 		Results []*sourcegraph.Sourcebox
+
+		TimeoutError bool
+		OtherError   bool
 	}
 	data.Query = strings.TrimSpace(r.FormValue("q"))
 
 	if data.Query != "" {
-		opt := &sourcegraph.UnitListOptions{
-			Query:       data.Query,
-			UnitType:    "Dockerfile",
-			ListOptions: sourcegraph.ListOptions{PerPage: 4},
-		}
-		units, _, err := sgc.Units.List(opt)
+		deadline := time.Now().Add(*queryTimeout)
+		var err error
+		data.Results, err = query(data.Query, deadline)
 		if err != nil {
-			log.Println("Units.List:", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		for _, u := range units {
-			su, err := u.SourceUnit()
-			if err != nil {
-				log.Println("SourceUnit:", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
+			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+				data.TimeoutError = true
 			}
-			sourceboxURL := sgc.BaseURL.ResolveReference(&url.URL{
-				Path: fmt.Sprintf("/%s@%s/.tree/%s/.sourcebox.json", u.Repo, u.CommitID, su.Files[0]),
-			})
-
-			resp, err := httpClient.Get(sourceboxURL.String())
-			if err != nil {
-				log.Printf("Get %q: %s", sourceboxURL, err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
+			if err == errQueryTimeout {
+				data.TimeoutError = true
 			}
-			defer resp.Body.Close()
-
-			var sb *sourcegraph.Sourcebox
-			if err := json.NewDecoder(resp.Body).Decode(&sb); err != nil {
-				log.Println("Decode:", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
+			if !data.TimeoutError {
+				data.OtherError = true
 			}
-			data.Results = append(data.Results, sb)
+			log.Printf("Query %s error: %s", data.Query, err)
 		}
 	}
 
@@ -181,3 +169,82 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func query(query string, deadline time.Time) ([]*sourcegraph.Sourcebox, error) {
+	opt := &sourcegraph.UnitListOptions{
+		Query:       query,
+		UnitType:    "Dockerfile",
+		ListOptions: sourcegraph.ListOptions{PerPage: 4},
+	}
+	units, _, err := sgc.Units.List(opt)
+	if err != nil {
+		return nil, err
+	}
+	var sourceboxURLs []string
+	for _, u := range units {
+		su, err := u.SourceUnit()
+		if err != nil {
+			return nil, err
+		}
+		sourceboxURL := sgc.BaseURL.ResolveReference(&url.URL{
+			Path: fmt.Sprintf("/%s@%s/.tree/%s/.sourcebox.json", u.Repo, u.CommitID, su.Files[0]),
+		})
+		sourceboxURLs = append(sourceboxURLs, sourceboxURL.String())
+	}
+	return getSourceboxes(sourceboxURLs, deadline)
+}
+
+func getSourceboxes(urls []string, deadline time.Time) ([]*sourcegraph.Sourcebox, error) {
+	getSourcebox := func(url string) (*sourcegraph.Sourcebox, error) {
+		resp, err := httpClient.Get(url)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("http response status %d from %s", resp.StatusCode, url)
+		}
+		var sb *sourcegraph.Sourcebox
+		return sb, json.NewDecoder(resp.Body).Decode(&sb)
+	}
+
+	sbs := make([]*sourcegraph.Sourcebox, len(urls))
+	errc := make(chan error)
+	for i, url := range urls {
+		go func(i int, url string) {
+			sb, err := getSourcebox(url)
+			sbs[i] = sb
+			errc <- err
+		}(i, url)
+	}
+
+	var firstErr error
+	timedOut := time.After(deadline.Sub(time.Now()))
+	okCount := 0
+	for range urls {
+		select {
+		case err := <-errc:
+			if err == nil {
+				okCount++
+			} else if err != nil && firstErr == nil {
+				firstErr = err
+			}
+		case <-timedOut:
+			if firstErr == nil {
+				firstErr = errQueryTimeout
+			}
+			break
+		}
+	}
+
+	// non-nil sbs
+	okSBs := make([]*sourcegraph.Sourcebox, 0, okCount)
+	for _, sb := range sbs {
+		if sb != nil {
+			okSBs = append(okSBs, sb)
+		}
+	}
+	return okSBs, firstErr
+}
+
+var errQueryTimeout = errors.New("results timeout")

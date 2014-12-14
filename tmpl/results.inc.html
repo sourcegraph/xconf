@@ -7,7 +7,18 @@
       {{.HTML}}
     </li>
   </ul>
-  {{else}}
+  {{end}}
+  {{if .TimeoutError}}
+  <div class="no-results alert alert-danger">
+    Your search timed out.
+    {{if .Results}}More results may be available. Please try again later.{{else}}Please try a different search or try again later.{{end}}
+  </div>  
+  {{else if .OtherError}}
+  <div class="no-results alert alert-danger">
+    {{if .Results}}Some results are temporarily unavailable.{{else}}Your search couldn't be handled at this time.{{end}}
+    Please try a different search or try again later.
+  </div>
+  {{else if not .Results}}
   <div class="no-results alert alert-warning">
     Your search - <em>{{.Query}}</em> - did not match any Dockerfiles.
   </div>
