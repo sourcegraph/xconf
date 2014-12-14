@@ -12,15 +12,16 @@ body {
 }
 
 {{$blue := "#4E9BD4"}}
-{{$blueDark := "#3E7Bc4"}}
+{{$blueDark := "#2a6aa4"}}
 .jumbotron {
     background-color: transparent;
     text-align: center;
     padding: 5px;
+    margin-bottom: 5px;
 }
 .jumbotron .brand {
     margin: 10px 0 0 0;
-    font-size: 3.5em;
+    font-size: 4em;
     font-weight: bold;
     color: {{$blue}};
 }
@@ -35,10 +36,28 @@ body {
     font-size: 2.1em;
 }
 .jumbotron .powered-by, .jumbotron .powered-by a {
-    color: #999;
+    color: #777;
 }
 .jumbotron .powered-by {
-    font-size: 1.3em;
+    font-size: 1.2em;
+}
+
+.news {
+    background-color: #ffc;
+    display: inline-block;
+    color: #333;
+    text-align: left;
+    padding: 9px 15px;
+    margin-left: -7px;
+    margin-right: -7px;
+    font-size: 1em;
+}
+.news a {
+    text-decoration: underline;
+    color: {{$blueDark}};
+}
+.news a:first-child {
+    font-weight: bold;
 }
 
 form.search {
