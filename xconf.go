@@ -73,7 +73,11 @@ var (
 		"ubuntu",
 		"apt-get install",
 		"add-apt-repository",
-		"golang",
+		"go get",
+		"",
+		"RUN",
+		"ONBUILD",
+		"ENV",
 	}
 )
 
@@ -99,7 +103,11 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	data.Query = strings.TrimSpace(r.FormValue("q"))
 
 	if data.Query != "" {
-		opt := &sourcegraph.UnitListOptions{Query: data.Query}
+		opt := &sourcegraph.UnitListOptions{
+			Query:       data.Query,
+			UnitType:    "Dockerfile",
+			ListOptions: sourcegraph.ListOptions{PerPage: 4},
+		}
 		units, _, err := sgc.Units.List(opt)
 		if err != nil {
 			log.Println("Units.List:", err)

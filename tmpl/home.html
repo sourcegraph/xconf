@@ -13,9 +13,7 @@
     <div class="container">
       <div class="jumbotron">
         <h1 class="brand">xconf.io</h1>
-        <!-- <p class="lead">Dockerfile search engine</p> -->
         <p class="powered-by">Powered by <a href="https://sourcegraph.com" target="_blank">✱ Sourcegraph</a></p>
-        <!-- <p><a class="btn btn-lg btn-success" href="#" role="button">Get started today</a></p> -->
       </div>
 
       <div class="row">
@@ -34,9 +32,17 @@
               <a data-toggle="dropdown" aria-expanded="false">Example queries <span class="caret"></span></a>
               <ul class="dropdown-menu" role="menu">
                 {{range exampleQueries}}
+                {{if .}}
                 <li><a href="{{queryURL .}}">{{.}}</a></li>
+                {{else}}
+                <li class="divider"></li>
+                {{end}}
                 {{end}}
               </ul>
+            </div>
+            <div class="btn-group about-link">
+              <a data-toggle="modal" data-target="#about">About</a>
+              
             </div>
           </form> 
         </div>
@@ -81,6 +87,8 @@
      });
      {{end}}
     </script>
+
+    {{template "AboutModal"}}
 
     {{template "BodyIncludes"}}
   </body>

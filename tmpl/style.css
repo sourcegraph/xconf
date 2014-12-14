@@ -2,6 +2,7 @@
 
 body {
     font-family: "Open Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+    overflow-y: scroll;
 }
 
 @media(min-width: 1200px) {
@@ -11,6 +12,7 @@ body {
 }
 
 {{$blue := "#4E9BD4"}}
+{{$blueDark := "#3E7Bc4"}}
 .jumbotron {
     background-color: transparent;
     text-align: center;
@@ -42,8 +44,15 @@ form.search {
 }
 form.search .btn-group {
     font-size: 1.3em;
-    margin-left: 10px;
+    margin-left: 15px;
     cursor: pointer;
+}
+form.search .about-link {
+
+}
+form.search button {
+    background-color: {{$blue}};
+    border-color: {{$blueDark}};
 }
 button .glyphicon {
     vertical-align: -2px;
