@@ -18,7 +18,7 @@
 
       <div class="row">
         <div class="col-md-12">
-          <form role="form" class="search">
+          <form action="?" role="form" class="search" data-pjax>
             <div class="form-group">
               <label for="q">Find Dockerfiles containing:</label>
               <input type="search" class="form-control input-lg" name="q" id="q"
@@ -48,35 +48,38 @@
         </div>
       </div>
 
-      {{if .Query}}
-      <div class="row results">
-        <div class="col-md-12">
-          {{range .Results}}
-          <ul class="list-unstyled">
-            <li>
-              <script type="text/javascript" src="{{.}}"></script>
-            </li>
-          </ul>
-          {{else}}
-          <div class="no-results alert alert-warning">
-            Your search - <em>{{.Query}}</em> - did not match any Dockerfiles.
-          </div>
-          {{end}}
-        </div>
+      <div class="row results" id="results" data-pjax-container>
+        {{template "Results" $}}
       </div>
-      {{end}}
 
     </div>
 
     <script>
-     {{if .Results}}
+     // Query highlighting
+     function highlightQuery() {
+       var q = document.getElementById("q").value;
+       if (q) {
+         q.split(/[^\w]/).forEach(function(p) {
+           $("pre.sourcegraph-code span:contains('" + p.replace(/[^\w.-]/g, "") + "')").css("background-color", "yellow");
+         });
+       }
+     }
+     document.addEventListener("DOMContentLoaded", highlightQuery);
+
+     // PJAX
      document.addEventListener("DOMContentLoaded", function() {
-       var q = {{.Query}};
-       q.split(/[^\w]/).forEach(function(p) {
-         $("pre.sourcegraph-code span:contains('" + p.replace(/[^\w.-]/g, "") + "')").css("background-color", "yellow");
+       /*$(document).on("submit", "form[data-pjax]", function(event) {
+             var $e = $(this);
+             var $container = $($e.attr("data-pjax"));
+             $.pjax.submit(event, {container: $container});
+             }); */
+
+       $(document).on("submit", "form[data-pjax]", function(event) {
+         console.log("PJAX submit");
+         $.pjax.submit(event, {container: $("[data-pjax-container]")});
+         event.preventDefault();
        });
      });
-     {{end}}
     </script>
 
     {{template "AboutModal"}}

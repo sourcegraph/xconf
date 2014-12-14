@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"html/template"
@@ -14,21 +15,35 @@ import (
 )
 
 var (
-	addr     = flag.String("http", ":5400", "HTTP bind address")
-	dev      = flag.Bool("dev", false, "development mode")
-	sgURLStr = flag.String("sg", "https://sourcegraph.com", "base Sourcegraph URL")
+	addr          = flag.String("http", ":5400", "HTTP bind address")
+	dev           = flag.Bool("dev", false, "development mode")
+	sgURLStr      = flag.String("sg", "https://sourcegraph.com", "base Sourcegraph URL")
+	sgAssetURLStr = flag.String("sg-asset", "https://sourcegraph.com/static/", "base Sourcegraph asset URL")
+)
+
+var (
+	sgURL      *url.URL
+	sgAssetURL *url.URL
 )
 
 func main() {
 	log.SetFlags(0)
 	flag.Parse()
 
-	sgURL, err := url.Parse(*sgURLStr)
+	var err error
+	sgURL, err = url.Parse(*sgURLStr)
 	if err != nil {
 		log.Fatal(err)
 	}
+	*sgURLStr = sgURL.String()
 	sgc.BaseURL = sgURL.ResolveReference(&url.URL{Path: "/api/"})
 	sgc.UserAgent = "xconf/0.0.1"
+
+	sgAssetURL, err = url.Parse(*sgAssetURLStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	*sgAssetURLStr = sgAssetURL.String()
 
 	if err := parseTemplates(); err != nil {
 		log.Fatal(err)
@@ -48,6 +63,9 @@ var (
 		"queryURL": func(q string) string {
 			return "/?" + url.Values{"q": []string{q}}.Encode()
 		},
+		"sgAssetURL": func(path string) string {
+			return sgAssetURL.ResolveReference(&url.URL{Path: path}).String()
+		},
 	}
 )
 
@@ -60,7 +78,8 @@ func parseTemplates() error {
 }
 
 var (
-	sgc = sourcegraph.NewClient(nil)
+	httpClient = &http.Client{}
+	sgc        = sourcegraph.NewClient(httpClient)
 )
 
 var (
@@ -98,7 +117,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 
 	var data struct {
 		Query   string
-		Results []string
+		Results []*sourcegraph.Sourcebox
 	}
 	data.Query = strings.TrimSpace(r.FormValue("q"))
 
@@ -122,13 +141,35 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			sourceboxURL := sgc.BaseURL.ResolveReference(&url.URL{
-				Path: fmt.Sprintf("/%s@%s/.tree/%s/.sourcebox.js", u.Repo, u.CommitID, su.Files[0]),
+				Path: fmt.Sprintf("/%s@%s/.tree/%s/.sourcebox.json", u.Repo, u.CommitID, su.Files[0]),
 			})
-			data.Results = append(data.Results, sourceboxURL.String())
+
+			resp, err := httpClient.Get(sourceboxURL.String())
+			if err != nil {
+				log.Printf("Get %q: %s", sourceboxURL, err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			defer resp.Body.Close()
+
+			var sb *sourcegraph.Sourcebox
+			if err := json.NewDecoder(resp.Body).Decode(&sb); err != nil {
+				log.Println("Decode:", err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			data.Results = append(data.Results, sb)
 		}
 	}
 
-	if err := tmpl.ExecuteTemplate(w, "home.html", &data); err != nil {
+	var tmplFile string
+	if r.Header.Get("x-pjax") != "" {
+		tmplFile = "results.inc.html"
+	} else {
+		tmplFile = "home.html"
+	}
+
+	if err := tmpl.ExecuteTemplate(w, tmplFile, &data); err != nil {
 		log.Println("ExecuteTemplate:", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

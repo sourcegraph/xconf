@@ -1,0 +1,19 @@
+{{define "Results"}}
+{{if .Query}}
+<div class="col-md-12">
+  {{range .Results}}
+  <ul class="list-unstyled">
+    <li>
+      {{.HTML}}
+    </li>
+  </ul>
+  {{else}}
+  <div class="no-results alert alert-warning">
+    Your search - <em>{{.Query}}</em> - did not match any Dockerfiles.
+  </div>
+  {{end}}
+</div>
+{{end}}
+{{end}}
+
+{{template "Results" $}}
