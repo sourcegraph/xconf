@@ -98,7 +98,7 @@ var (
 			return ".min."
 		},
 		"voteLink": func(voteFor, label, class string) template.HTML {
-			return template.HTML(fmt.Sprintf(`<a class="%s" target="_blank" href="https://twitter.com/intent/tweet?text=%s&via=srcgraph&url=%s">%s</a>`, class, url.QueryEscape(fmt.Sprintf("I wish #xconf let me search & see examples of %s config files", voteFor)), url.QueryEscape("https://xconf.io"), label))
+			return template.HTML(fmt.Sprintf(`<a class="%s" target="_blank" href="https://twitter.com/intent/tweet?text=%s&via=srcgraph&url=%s">%s</a>`, class, url.QueryEscape(fmt.Sprintf("I wish #xconf let me search & see examples of %s config files", voteFor)), url.QueryEscape("http://xconf.io"), label))
 		},
 	}
 )
