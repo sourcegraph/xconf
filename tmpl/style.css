@@ -32,14 +32,14 @@ body {
     padding-bottom: 0;
     margin-bottom: 0;
 }
+.jumbotron .lead, .jumbotron .powered-by {
+font-size: 1.2em;
+}
 .jumbotron .lead {
-    font-size: 2.1em;
+    font-weight: bold;
 }
-.jumbotron .powered-by, .jumbotron .powered-by a {
+.jumbotron .lead, .jumbotron .powered-by, .jumbotron .powered-by a {
     color: #777;
-}
-.jumbotron .powered-by {
-    font-size: 1.2em;
 }
 
 .news {
