@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -69,6 +70,11 @@ func main() {
 	}
 
 	http.HandleFunc("/", homeHandler)
+	http.HandleFunc("/robots.txt", func(w http.ResponseWriter, req *http.Request) {
+		io.WriteString(w, `User-agent: *
+Allow: /
+`)
+	})
 
 	log.Println("Listening on", *addr)
 	log.Fatal(http.ListenAndServe(*addr, nil))
