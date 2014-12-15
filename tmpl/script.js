@@ -6,10 +6,15 @@ function highlightQuery() {
   if (!resultsList || resultsList.childNodes.length == 0) return; // nothing to highlight
   var q = document.getElementById("q").value;
   if (q) {
-    q.split(/[^\w]+/).forEach(function(p) {
+    q.toLowerCase().split(/[^\w]+/).forEach(function(p) {
       p=p.trim();
       if (!p) return;
-      $("pre.sourcegraph-code span:contains('" + p.replace(/[^\w.-]/g, "") + "')").css("background-color", "yellow");
+      var spans = resultsList.querySelectorAll("pre.sourcegraph-code span");
+      for (var i = 0; i < spans.length; i++) {
+        if (spans[i].innerText.toLowerCase().indexOf(p) !== -1) {
+          spans[i].style.backgroundColor = "yellow";
+        }
+      }
     });
   }
 }
@@ -83,6 +88,8 @@ document.addEventListener("DOMContentLoaded", function() {
     search(fakeEvent, $q.value.trim(), {blurInput: false, container: $("[data-pjax-container]"), replace: true});
   }, 200, false);
   var handleKeyInput = function(ev) {
+    if (!event.charCode) return;
+    if (String.fromCharCode(ev.charCode) == " ") return;
     setTimeout(function() {
       var q = $q.value.trim();
       if (q) {

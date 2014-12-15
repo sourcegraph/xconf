@@ -1,13 +1,13 @@
 {{define "Results"}}
 {{if .Query}}
 <div class="col-md-12">
-  {{range .Results}}
   <ul class="list-unstyled" id="results">
+    {{range .Results}}
     <li class="result">
       {{.HTML}}
     </li>
+    {{end}}
   </ul>
-  {{end}}
   {{if .TimeoutError}}
   <div class="no-results alert alert-danger">
     Your search timed out.
