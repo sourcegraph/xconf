@@ -71,6 +71,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Update the query field with the popular query after a click.
     popularQueriesElems[i].addEventListener("click", function(ev) {
+      if (ev.target.tagName != "A") return;
       var $a = ev.target;
       var $q = document.getElementById("q");
       $q.value = $a.dataset.query;
