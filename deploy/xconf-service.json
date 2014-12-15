@@ -1,0 +1,9 @@
+{
+  "apiVersion": "v1beta1",
+  "kind": "Service",
+  "id": "xconf",
+  "port": 80,
+  "containerPort": "http-server",
+  "selector": { "name": "xconf" },
+  "createExternalLoadBalancer": true
+}

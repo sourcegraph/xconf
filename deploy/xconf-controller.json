@@ -1,0 +1,26 @@
+{
+  "id": "xconf-controller",
+  "kind": "ReplicationController",
+  "apiVersion": "v1beta1",
+  "desiredState": {
+    "replicas": 3,
+    "replicaSelector": {"name": "xconf"},
+    "podTemplate": {
+      "desiredState": {
+        "manifest": {
+          "version": "v1beta1",
+          "id": "xconf-controller",
+          "containers": [{
+            "name": "sqs1-xconf",
+            "image": "sqs1/xconf",
+            "cpu": 100,
+            "memory": 50000000,
+            "ports": [{"name": "http-server", "containerPort": 5400, "hostPort": 5400}]
+          }]
+        }
+      },
+      "labels": { "name": "xconf" }
+    }
+  },
+  "labels": {"name": "xconf"}
+}
