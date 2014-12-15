@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", function() {
     search(fakeEvent, $q.value.trim(), {blurInput: false, container: $("[data-pjax-container]"), replace: true});
   }, 200, false);
   var handleKeyInput = function(ev) {
-    if (!event.charCode) return;
+    if (!event.charCode && !(event.which == 8 || event.which == 46)) return;
     if (String.fromCharCode(ev.charCode) == " ") return;
     setTimeout(function() {
       var q = $q.value.trim();
@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", function() {
   $($q).on("keypress", handleKeyInput);
   $($q).on("keyup", function(event) {
     // DELETE or BACKSPACE key.
-    if (event.which == 8 || event.which == 46 || true) handleKeyInput(event);
+    if (event.which == 8 || event.which == 46) handleKeyInput(event);
   });
 });
 
