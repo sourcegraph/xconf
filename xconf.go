@@ -72,7 +72,7 @@ var (
 	tmpl      *template.Template
 	tmplMu    sync.Mutex
 	tmplFuncs = template.FuncMap{
-		"exampleQueries": func() []string { return exampleQueries },
+		"popularQueries": func() []string { return popularQueries },
 		"queryURL": func(q string) string {
 			return "/?" + url.Values{"q": []string{q}}.Encode()
 		},
@@ -100,7 +100,7 @@ func parseTemplates() error {
 }
 
 var (
-	exampleQueries = []string{
+	popularQueries = []string{
 		"nodejs",
 		"docpad",
 		"mysql",

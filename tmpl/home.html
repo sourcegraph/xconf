@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>xconf.io - Dockerfile search</title>
+    <title>xconf.io - Config search</title>
 
     {{template "HeadIncludes"}}
     <style>{{template "HeadStyles"}}</style>
@@ -13,7 +13,7 @@
     <div class="container">
       <div class="jumbotron">
         <h1 class="brand"><a href="/">xconf.io</a></h1>
-        <p class="powered-by">Dockerfile search engine</p>
+        <p class="powered-by">Config search engine</p>
         <p class="powered-by">Powered by <a href="https://sourcegraph.com" target="_blank">✱ Sourcegraph</a></p>
       </div>
 
@@ -31,9 +31,9 @@
             </div>
             <button type="submit" class="btn btn-primary btn-lg"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search Dockerfiles</button>
             <div class="btn-group">
-              <a data-toggle="dropdown" aria-expanded="false">Example queries <span class="caret"></span></a>
-              <ul class="dropdown-menu" role="menu" id="example-queries">
-                {{range exampleQueries}}
+              <a data-toggle="dropdown" aria-expanded="false">Popular queries <span class="caret"></span></a>
+              <ul class="dropdown-menu popular-queries" role="menu">
+                {{range popularQueries}}
                 {{if .}}
                 <li><a data-query="{{.}}" href="{{queryURL .}}">{{.}}</a></li>
                 {{else}}
@@ -50,6 +50,9 @@
         </div>
       </div>
 
+      <div class="row" id="welcome-container">
+        {{template "Welcome" $}}
+      </div>
       <div class="row" id="results-container" data-pjax-container>
         {{template "Results" $}}
       </div>

@@ -15,10 +15,23 @@ function highlightQuery() {
 }
 document.addEventListener("DOMContentLoaded", highlightQuery);
 
+function search(ev, q, pjaxOpt) {
+  if (q) {
+    $("#welcome-container").hide();
+    $.pjax.submit(ev, pjaxOpt || {container: $("[data-pjax-container]")});
+  } else {
+    if (ev) ev.preventDefault();
+    $("#fake-results-container").hide().removeClass("vis");
+    $("#results-container").hide();
+    $("#welcome-container").show().addClass("vis");
+    var newURL = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    window.history.pushState(null, "", newURL);
+  }
+}
+
 // PJAX
 $(document).on("submit", "form[data-pjax]", function(event) {
-  $.pjax.submit(event, {container: $("[data-pjax-container]")});
-  event.preventDefault();
+  search(ev, document.getElementById("q").value);
 });
 document.addEventListener("pjax:end", function() {
   highlightQuery();
@@ -28,11 +41,12 @@ document.addEventListener("pjax:end", function() {
 
 $.pjax.defaults.timeout = 60000; // Time out after 60 seconds.
 $(document).on("pjax:send", function(ev) {
-  $("#fake-results-container").show().addClass("show");
+  $("#welcome-container").hide();
+  $("#fake-results-container").show().addClass("vis");
   $("#results-container").hide();
 });
 $(document).on("pjax:complete", function(ev) {
-  $("#fake-results-container").hide().removeClass("show");
+  $("#fake-results-container").hide().removeClass("vis");
   $("#results-container").show();
 });
 
@@ -44,36 +58,48 @@ $(document).on("pjax:end", function(ev) {
 });
 
 
-// Use PJAX for example queries.
+// Use PJAX for popular queries.
 document.addEventListener("DOMContentLoaded", function() {
-  var exampleQueries = document.getElementById("example-queries");
-  $(exampleQueries).pjax("a", "[data-pjax-container]");
+  var popularQueriesElems = document.querySelectorAll(".popular-queries");
+  for (var i = 0; i < popularQueriesElems.length; i++) {
+    $(popularQueriesElems[i]).pjax("a", "[data-pjax-container]");
 
-  // Update the query field with the example query after a click.
-  exampleQueries.addEventListener("click", function(ev) {
-    var $a = ev.target;
-    var $q = document.getElementById("q");
-    $q.value = $a.dataset.query;
-    $q.focus();
-  });
+    // Update the query field with the popular query after a click.
+    popularQueriesElems[i].addEventListener("click", function(ev) {
+      var $a = ev.target;
+      var $q = document.getElementById("q");
+      $q.value = $a.dataset.query;
+      $q.focus();
+    });
+  }
 });
 
 // Automatically start searching after typing.
 document.addEventListener("DOMContentLoaded", function() {
   var $q = document.getElementById("q");
-  var lastValue = $q.value.trim();
 
-  var handleKeyInput = debounce(function(ev) {
-    if ($q.value.trim() == lastValue) return;
-    lastValue = $q.value.trim();
+  var debouncedSearch = debounce(function() {
     var fakeEvent = {currentTarget: $q.form, type: "submit", preventDefault: function() {}};
-    $.pjax.submit(fakeEvent, {blurInput: false, container: $("[data-pjax-container]"), replace: true});
-  }, 500, false);
-
+    search(fakeEvent, $q.value.trim(), {blurInput: false, container: $("[data-pjax-container]"), replace: true});
+  }, 200, false);
+  var handleKeyInput = function(ev) {
+    setTimeout(function() {
+      var q = $q.value.trim();
+      if (q) {
+        $("#welcome-container").hide();
+        $("#results-container").hide();
+        $("#fake-results-container").show().addClass("vis");
+        debouncedSearch();
+      } else {
+        search(null, null); // reset everything
+      }
+    });
+  }
+  
   $($q).on("keypress", handleKeyInput);
   $($q).on("keyup", function(event) {
     // DELETE or BACKSPACE key.
-    if (event.which == 8 || event.which == 46) handleKeyInput(event);
+    if (event.which == 8 || event.which == 46 || true) handleKeyInput(event);
   });
 });
 
@@ -91,5 +117,14 @@ function debounce(callback, delay) {
   };
 };
 
+
+// Animate welcome on page load, if there's no search.
+document.addEventListener("DOMContentLoaded", function() {
+  setTimeout(function() {
+    if (!document.getElementById("q").value.trim()) {
+      document.getElementById("welcome-container").classList.add("vis");
+    }
+  });
+});
 
 // {{end}}

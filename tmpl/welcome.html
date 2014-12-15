@@ -1,0 +1,13 @@
+{{define "Welcome"}}
+<div class="col-md-8 col-md-push-2">
+  <h2>Start typing to search Dockerfiles</h2>
+  <p>Or try a popular search:</p>
+  <ul class="popular-queries list-unstyled">
+    {{range popularQueries}}
+    {{if .}}
+    <li><a data-query="{{.}}" href="{{queryURL .}}">{{.}}</a></li>
+    {{end}}
+    {{end}}
+  </ul>
+</div>
+{{end}}

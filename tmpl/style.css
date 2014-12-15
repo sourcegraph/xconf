@@ -60,9 +60,6 @@ body {
     font-weight: bold;
 }
 
-form.search {
-    _text-align: center;
-}
 form.search .btn-group {
     font-size: 1.3em;
     margin-left: 15px;
@@ -96,10 +93,36 @@ button .glyphicon {
     font-style: normal;
 }
 
+#welcome-container {
+    margin-top: 9%;
+    text-align: center;
+    opacity: 0;
+}
+#welcome-container:not(.vis) {
+    display: none;
+}
+#welcome-container.vis {
+    opacity: 1;
+    transition: opacity 0.8s ease-in-out;
+}
+#welcome-container h2 {
+    color: #999;
+}
+#welcome-container p {
+    color: #777;
+}
+#welcome-container h2 {
+    font-weight: bold;
+    font-size: 1.8em;
+}
+
 #fake-results-container {
     opacity: 0;
 }
-#fake-results-container.show {
+#fake-results-container:not(.vis) {
+    display: none;
+}
+#fake-results-container.vis {
     opacity: 1;
     transition: opacity 0.1s ease-in-out;
 }
