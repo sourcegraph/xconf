@@ -14,6 +14,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gregjones/httpcache"
+
 	"sourcegraph.com/sourcegraph/go-sourcegraph/sourcegraph"
 )
 
@@ -42,6 +44,10 @@ func main() {
 	flag.Parse()
 
 	httpClient.Timeout = *clientTimeout
+
+	if !*dev {
+		httpClient.Transport = newCancelableHTTPMemoryCacheTransport()
+	}
 
 	var err error
 	sgURL, err = url.Parse(*sgURLStr)
@@ -251,3 +257,17 @@ func getSourceboxes(urls []string, deadline time.Time) ([]*sourcegraph.Sourcebox
 }
 
 var errQueryTimeout = errors.New("results timeout")
+
+func newCancelableHTTPMemoryCacheTransport() http.RoundTripper {
+	// httpcache doesn't support CancelRequest; wrap it. TODO(sqs):
+	// submit a patch to httpcache to fix this.
+	t := httpcache.NewMemoryCacheTransport()
+	t.Transport = http.DefaultTransport
+	return &cancelableHTTPCacheTransport{t}
+}
+
+type cancelableHTTPCacheTransport struct{ *httpcache.Transport }
+
+func (t *cancelableHTTPCacheTransport) CancelRequest(req *http.Request) {
+	t.Transport.Transport.(*http.Transport).CancelRequest(req)
+}
