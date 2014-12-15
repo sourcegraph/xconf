@@ -185,7 +185,18 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+var isDockerfileInstruction = map[string]bool{
+	"from": true, "maintainer": true, "run": true, "cmd": true,
+	"expose": true, "env": true, "add": true, "copy": true,
+	"entrypoint": true, "volume": true, "user": true, "workdir": true,
+	"onbuild": true,
+}
+
 func query(query string, deadline time.Time) ([]*sourcegraph.Sourcebox, error) {
+	if isDockerfileInstruction[strings.ToLower(query)] {
+		// HACK: it searches the JSON encoded text, which means the text looks like "\nADD".
+		query = "n" + query
+	}
 	opt := &sourcegraph.UnitListOptions{
 		Query:       query,
 		UnitType:    "Dockerfile",
